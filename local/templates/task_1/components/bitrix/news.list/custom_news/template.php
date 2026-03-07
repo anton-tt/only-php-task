@@ -27,4 +27,8 @@ $this->setFrameMode(true);
         <?php endforeach; ?>
     </div>
 </div> 
- 
+
+
+<!-- <script>
+console.log(<//?= json_encode($arResult, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>);
+</script> -->
