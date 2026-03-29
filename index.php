@@ -1,8 +1,9 @@
 <?
 define("SITE_TEMPLATE_ID", "task_1");
-require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php"); //.default
+require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("Новости компании");?>
-<?$APPLICATION->IncludeComponent(
+
+<!-- ?$APPLICATION->IncludeComponent(
 	"bitrix:news.list", 
 	"custom_news", 
 	array(
@@ -67,5 +68,14 @@ $APPLICATION->SetTitle("Новости компании");?>
 		"MESSAGE_404" => ""
 	),
 	false
+);?-->
+<?$APPLICATION->IncludeComponent(
+    "bitrix:form.result.new",
+    ".default",
+    array(
+        "WEB_FORM_ID" => "1",
+        "IGNORE_CUSTOM_TEMPLATE" => "N",
+        "USE_EXTENDED_ERRORS" => "Y"
+    )
 );?>
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
