@@ -11,10 +11,11 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <link rel="shortcut icon" href="<?=SITE_TEMPLATE_PATH?>/images/favicon.604825ed.ico" type="image/x-icon">
+    <link href="<?=SITE_TEMPLATE_PATH?>/css/fonts.css" rel="stylesheet">
     <link href="<?=SITE_TEMPLATE_PATH?>/css/common.css" rel="stylesheet">
     
-
 </head>
-    <!-- <//?php $APPLICATION->ShowPanel(); ?> -->
-<?php $APPLICATION->ShowPanel(); ?>
+
 <body>
+    <?php $APPLICATION->ShowPanel(); ?>
+    
