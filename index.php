@@ -4,8 +4,8 @@ require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/header.php");
 $APPLICATION->SetTitle("Новости компании"); ?>
 
 <? $APPLICATION->IncludeComponent(
-	"bitrix:form.result.new",
-	"custom_form",
+	"bitrix:news.list",
+	".default",
 	array(
 		"WEB_FORM_ID" => "1",
 		"IGNORE_CUSTOM_TEMPLATE" => "N",
