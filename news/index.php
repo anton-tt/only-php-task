@@ -81,7 +81,7 @@ $APPLICATION->SetTitle("Новости компании");
 	"AJAX_OPTION_ADDITIONAL" => "",
 	"SEF_URL_TEMPLATES" => array(
 		"news" => "",
-		"section" => "",
+		"section" => "section/#SECTION_ID#/",
 		"detail" => "#ELEMENT_ID#/",
 		"search" => "search/",
 		"rss" => "rss/",
