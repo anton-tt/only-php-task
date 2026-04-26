@@ -1,5 +1,4 @@
 <?php
-
 require_once($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/main/include/prolog_before.php");
 
 global $USER;
@@ -11,7 +10,6 @@ if (!$USER->IsAdmin()) {
 
 $IBLOCK_ID = 4;
 $arProps = [];
-
 $el = new CIBlockElement;
 
 $rsProp = CIBlockPropertyEnum::GetList(
@@ -47,7 +45,7 @@ if (($handle = fopen("vacancy.csv", "r")) !== false) {
         $PROP['EMAIL']       = $data[12];
         $PROP['DATE']        = date('d.m.Y');
         $PROP['TYPE']        = $data[8];
-        $PROP['SALARY_TYPE'] = $data[7];
+        $PROP['SALARY_TYPE'] = '';
         $PROP['SALARY_VALUE'] = $data[7];
         $PROP['SCHEDULE']    = $data[10];
 
@@ -96,6 +94,28 @@ if (($handle = fopen("vacancy.csv", "r")) !== false) {
 
         if (trim($data[3]) === '') {
             continue;
+        }
+
+        if ($PROP['SALARY_VALUE'] == '-') {
+            $PROP['SALARY_VALUE'] = '';
+        } elseif ($PROP['SALARY_VALUE'] == 'по договоренности') {
+            $PROP['SALARY_VALUE'] = '';
+            $PROP['SALARY_TYPE'] = $arProps['SALARY_TYPE']['Договорная'];
+        } else {
+            $arSalary = explode(' ', $PROP['SALARY_VALUE']);
+            if ($arSalary[0] == 'от') {
+
+                $PROP['SALARY_TYPE'] = $arProps['SALARY_TYPE']['ОТ'];
+                array_shift($arSalary);
+                $PROP['SALARY_VALUE'] = implode(' ', $arSalary);
+            } elseif ($arSalary[0] == 'до') {
+
+                $PROP['SALARY_TYPE'] = $arProps['SALARY_TYPE']['ДО'];
+                array_shift($arSalary);
+                $PROP['SALARY_VALUE'] = implode(' ', $arSalary);
+            } else {
+                $PROP['SALARY_TYPE'] = $arProps['SALARY_TYPE']['='];
+            }
         }
 
         $arLoadProductArray = [

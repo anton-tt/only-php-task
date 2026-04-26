@@ -67,4 +67,44 @@ $APPLICATION->SetTitle("Новости компании");?>
 	),
 	false
 );?>
+
+<h2>Вакансии (инфоблок с id = 4)</h2>
+
+<?php
+$APPLICATION->IncludeComponent(
+    "bitrix:news.list",
+    "",
+    [
+        "IBLOCK_ID" => 4,
+        "NEWS_COUNT" => 10,
+
+        "SORT_BY1" => "ID",
+        "SORT_ORDER1" => "DESC",
+
+        "FIELD_CODE" => [
+            "NAME",
+            "PREVIEW_TEXT",
+            "DETAIL_TEXT",
+            "DATE_CREATE"
+        ],
+
+        "PROPERTY_CODE" => [
+            "OFFICE",
+            "LOCATION",
+            "REQUIRE",
+            "DUTY",
+            "CONDITIONS",
+            "EMAIL",
+            "TYPE",
+            "SALARY_TYPE",
+            "SALARY_VALUE",
+            "SCHEDULE"
+        ],
+
+        "CACHE_TYPE" => "N",
+        "SET_TITLE" => "N"
+    ]
+);
+?>
+
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
