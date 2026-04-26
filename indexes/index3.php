@@ -1,4 +1,4 @@
-<!-- должен находиться в папке news -->
+<!-- должен находиться в папке news, а не на главной -->
 <?
 define("SITE_TEMPLATE_ID", "task_3");
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
