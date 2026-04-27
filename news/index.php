@@ -1,9 +1,8 @@
 <?
-define("SITE_TEMPLATE_ID", "task_3");
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("Новости компании");
 ?>
-<?$APPLICATION->IncludeComponent("bitrix:news", "custom_news", array(
+<p><?$APPLICATION->IncludeComponent("bitrix:news", ".default", array(
 	"IBLOCK_TYPE" => "news",
 	"IBLOCK_ID" => "1",
 	"NEWS_COUNT" => "20",
@@ -81,7 +80,7 @@ $APPLICATION->SetTitle("Новости компании");
 	"AJAX_OPTION_ADDITIONAL" => "",
 	"SEF_URL_TEMPLATES" => array(
 		"news" => "",
-		"section" => "section/#SECTION_ID#/",
+		"section" => "",
 		"detail" => "#ELEMENT_ID#/",
 		"search" => "search/",
 		"rss" => "rss/",
@@ -89,5 +88,5 @@ $APPLICATION->SetTitle("Новости компании");
 	)
 	),
 	false
-);?>
+);?></p>
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
