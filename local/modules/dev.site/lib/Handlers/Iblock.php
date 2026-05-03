@@ -7,8 +7,10 @@ class Iblock
 
     public static function handleElement($arFields)
     {
-        $iblockId = (int)$arFields['IBLOCK_ID'];
-        $elementId = (int)$arFields['ID'];
+        if (defined('DEV_SITE_LOG_PROCESS')) {
+            return;
+        }
+        define('DEV_SITE_LOG_PROCESS', true);
 
         $logIblock = \CIBlock::GetList([], ['CODE' => 'LOG'])->Fetch();
         if (!$logIblock) {
@@ -16,65 +18,151 @@ class Iblock
         }
 
         $logIblockId = (int)$logIblock['ID'];
+        $iblockId = (int)$arFields['IBLOCK_ID'];
         if ($iblockId == $logIblockId) {
             return;
         }
 
-        $iblock = \CIBlock::GetByID($iblockId)->Fetch();
-        $iblockName = $iblock['NAME'];
-
+        $elementId = (int)$arFields['ID'];
         $element = \CIBlockElement::GetByID($elementId)->Fetch();
         if (!$element) {
-    file_put_contents(
-        $_SERVER['DOCUMENT_ROOT'] . '/local/event_debug.txt',
-        "EXIT: element not found ID={$elementId}\n",
-        FILE_APPEND
-    );
-    return;
-}
-        
-        $elementName = $element['NAME'];
-
-        $sectionId = (int)$element['IBLOCK_SECTION_ID'];
-        $sectionName = '';
-
-        if ($sectionId > 0) {
-            $section = \CIBlockSection::GetByID($sectionId)->Fetch();
-            $sectionName = $section['NAME'];
+            return;
         }
 
-        $path = $iblockName;
-        if ($sectionName) {
-            $path .= ' -> ' . $sectionName;
-        }
-        $path .= ' -> ' . $elementName;
+        $iblock = \CIBlock::GetByID($iblockId)->Fetch();
+        $logSection = \CIBlockSection::GetList(
+            [],
+            [
+                'IBLOCK_ID' => $logIblockId,
+                'CODE' => $iblock['CODE']
+            ],
+            false,
+            ['ID']
+        )->Fetch();
+        $logSectionId = $logSection ? (int)$logSection['ID'] : 0;
 
-        $el = new \CIBlockElement;
+        $iblockName = $iblock['NAME'] ?? '';
+        if ($logSectionId === 0) {
+            $bs = new \CIBlockSection;
+            $newSectionId = $bs->Add([
+                'IBLOCK_ID' => $logIblockId,
+                'NAME' => $iblockName,
+                'CODE' => $iblock['CODE'],
+                'ACTIVE' => 'Y',
+            ]);
+            if ($newSectionId) {
+                $logSectionId = (int)$newSectionId;
+            }
+        }
+
+        $sections = self::getSectionPath((int)$element['IBLOCK_SECTION_ID']);
+        $currentSectionId = $logSectionId;
+        foreach ($sections as $sectionName) {
+            $code = \CUtil::translit($sectionName, 'ru', [
+                'replace_space' => '-',
+                'replace_other' => '-'
+            ]);
+            $section = \CIBlockSection::GetList(
+                [],
+                [
+                    'IBLOCK_ID' => $logIblockId,
+                    'CODE' => $code,
+                    'SECTION_ID' => $currentSectionId
+                ],
+                false,
+                ['ID']
+            )->Fetch();
+
+            $sectionId = $section ? (int)$section['ID'] : 0;
+            if ($sectionId === 0) {
+                $bs = new \CIBlockSection;
+                $newId = $bs->Add([
+                    'IBLOCK_ID' => $logIblockId,
+                    'NAME' => $sectionName,
+                    'CODE' => $code,
+                    'ACTIVE' => 'Y',
+                    'IBLOCK_SECTION_ID' => $currentSectionId,
+                ]);
+                if ($newId) {
+                    $sectionId = (int)$newId;
+                }
+            }
+            $currentSectionId = $sectionId;
+        }
+
+        $elementName = $element['NAME'] ?? '';
+        $pathParts = array_merge(
+            [$iblockName],
+            $sections,
+            [$elementName]
+        );
+        $path = implode(' -> ', $pathParts);
+
+        $existingLog = \CIBlockElement::GetList(
+            [],
+            [
+                'IBLOCK_ID' => $logIblockId,
+                'NAME' => (string) $elementId
+            ],
+            false,
+            false,
+            ['ID']
+        )->Fetch();
+
+        $activeFrom =
+            $arFields['TIMESTAMP_X']
+            ?? $arFields['DATE_CREATE']
+            ?? $element['TIMESTAMP_X']
+            ?? $element['DATE_CREATE'];
+
         $arLogFields = [
             'IBLOCK_ID' => $logIblockId,
-            'NAME' => $path,
+            'NAME' => (string) $elementId,
+            'PREVIEW_TEXT' => $path,
             'ACTIVE' => 'Y',
+            'ACTIVE_FROM' => $activeFrom,
+            'IBLOCK_SECTION_ID' => $currentSectionId,
         ];
-        $ID = $el->Add($arLogFields);
 
-        if ($ID) {
-
-    $log = "LOG CREATED: {$ID}\n";
-    $log .= "ADD RESULT: " . var_export($ID, true) . PHP_EOL;
-
-    file_put_contents(
-        $_SERVER['DOCUMENT_ROOT'] . '/local/event_debug.txt',
-        $log,
-        FILE_APPEND
-    );
-
-} else {
-
-    file_put_contents(
-        $_SERVER['DOCUMENT_ROOT'] . '/local/event_debug.txt',
-        "LOG ERROR: " . $el->LAST_ERROR . PHP_EOL,
-        FILE_APPEND
-    );
-}
+        $el = new \CIBlockElement;
+        if ($existingLog) {
+            $el->Update($existingLog['ID'], $arLogFields);
+        } else {
+            $el->Add($arLogFields);
+        }
     }
+
+    private static function getSectionPath($sectionId)
+    {
+        if ($sectionId <= 0) {
+            return [];
+        }
+
+        $section = \CIBlockSection::GetByID($sectionId)->Fetch();
+        if (!$section) {
+            return [];
+        }
+
+        $path = self::getSectionPath((int)$section['IBLOCK_SECTION_ID']);
+        $path[] = $section['NAME'];
+        return $path;
+    }
+    
 }
+
+/*
+$debug = [
+            'time' => date('Y-m-d H:i:s'),
+            'iblockId' => $iblockId,
+            'elementId' => $elementId,
+            'elementName' => $elementName,
+            'logPath' => $path,
+            'activeFrom' => $activeFrom,
+            'sectionId' => $currentSectionId,
+        ];
+
+        file_put_contents(
+            $_SERVER['DOCUMENT_ROOT'] . '/local/dev_site_debug.log',
+            print_r($debug, true) . "\n--------------------\n",
+            FILE_APPEND
+        ); */
