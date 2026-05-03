@@ -7,10 +7,17 @@ class Iblock
 
     public static function handleElement($arFields)
     {
-        if (defined('DEV_SITE_LOG_PROCESS')) {
+
+    file_put_contents(
+        $_SERVER['DOCUMENT_ROOT'] . '/local/dev_site_update.log',
+        date('Y-m-d H:i:s') . " UPDATE EVENT\n" . print_r($arFields, true) . "\n----------------\n",
+        FILE_APPEND
+    );
+        static $running = false;
+        if ($running) {
             return;
         }
-        define('DEV_SITE_LOG_PROCESS', true);
+        $running = true;
 
         $logIblock = \CIBlock::GetList([], ['CODE' => 'LOG'])->Fetch();
         if (!$logIblock) {
@@ -147,7 +154,6 @@ class Iblock
         $path[] = $section['NAME'];
         return $path;
     }
-    
 }
 
 /*
