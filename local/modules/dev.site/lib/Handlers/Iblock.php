@@ -9,10 +9,10 @@ class Iblock
     {
 
     file_put_contents(
-        $_SERVER['DOCUMENT_ROOT'] . '/local/dev_site_update.log',
-        date('Y-m-d H:i:s') . " UPDATE EVENT\n" . print_r($arFields, true) . "\n----------------\n",
-        FILE_APPEND
-    );
+    $_SERVER['DOCUMENT_ROOT'] . '/local/dev_site_update.log',
+    "LOG CHECK START\n",
+    FILE_APPEND
+);
         static $running = false;
         if ($running) {
             return;
@@ -25,6 +25,11 @@ class Iblock
         }
 
         $logIblockId = (int)$logIblock['ID'];
+        file_put_contents(
+    $_SERVER['DOCUMENT_ROOT'] . '/local/dev_site_update.log',
+    print_r($logIblock, true),
+    FILE_APPEND
+);
         $iblockId = (int)$arFields['IBLOCK_ID'];
         if ($iblockId == $logIblockId) {
             return;
