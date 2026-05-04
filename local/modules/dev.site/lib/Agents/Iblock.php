@@ -27,23 +27,23 @@ class Iblock
         }
 
         $rs = \CIBlockElement::GetList(
-            ['TIMESTAMP_X' => 'DESC', 'ID' => 'DESC'],
-            ['IBLOCK_ID' => $logIblockId],
-            false,
-            [
-                'nOffset' => 10,
-                'nTopCount' => 50
-            ],
-            ['ID']
-        );
+    ['TIMESTAMP_X' => 'DESC', 'ID' => 'DESC'],
+    ['IBLOCK_ID' => $logIblockId],
+    false,
+    false,
+    ['ID']
+);
 
-        $toDelete = [];
-        while ($el = $rs->Fetch()) {
-            $toDelete[] = (int)$el['ID'];
-        }
-        foreach ($toDelete as $id) {
-            \CIBlockElement::Delete($id);
-        }
+$ids = [];
+while ($el = $rs->Fetch()) {
+    $ids[] = (int)$el['ID'];
+}
+
+$toDelete = array_slice($ids, 10);
+
+foreach ($toDelete as $id) {
+    \CIBlockElement::Delete($id);
+}
     
         return "\\Dev\\Site\\Agents\\Iblock::cleanLog();";
     }
